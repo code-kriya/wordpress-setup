@@ -1,0 +1,32 @@
+---
+- name: Install MySQL Server
+  apt:
+    # name: mysql-server
+    name: "{{ package }}"
+    state: present
+  vars:
+    package:
+      - mysql-server
+      - libmysqlclient-dev
+      - mysql-client
+      - python3-pip
+
+- name: Install mysqlclient Python package
+  pip:
+    name: mysqlclient
+    executable: pip3
+
+- name: restart mysql
+  command: service mysql restart
+
+- name: Alter MySQL root user password
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mysql_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: "root"
+    # login_password: "{{ ansible_become_pass }}"
+    state: present
+    update_password: always
+  ignore_errors: yes

@@ -1,0 +1,13 @@
+---
+# - name: restart nginx
+#   service: name=nginx state=restarted enabled=yes
+
+- name: test nginx configuration
+  command: nginx -t
+
+- name: restart nginx
+  command: service nginx restart
+  # service:
+  #   name: nginx
+  #   state: restarted
+  #   enabled: yes

@@ -1,0 +1,100 @@
+---
+- name: Add php repository
+  apt_repository:
+    repo: "ppa:ondrej/php"
+    state: present
+
+- name: Install php
+  apt:
+    name: "{{ package }}"
+  vars:
+    package:
+      - php8.0-fpm
+      - php8.0-common
+      - php8.0-mysql
+      - php8.0-xml
+      - php8.0-xmlrpc
+      - php8.0-curl
+      - php8.0-gd
+      - php8.0-imagick
+      - php8.0-cli
+      - php8.0-dev
+      - php8.0-imap
+      - php8.0-mbstring
+      - php8.0-opcache
+      - php8.0-redis
+      - php8.0-soap
+      - php8.0-zip
+
+- name: update fpm conf user
+  lineinfile:
+    path: /etc/php/8.0/fpm/pool.d/www.conf
+    regexp: "(user = ).+"
+    line: '\1{{ user_name }}'
+    backrefs: yes
+
+- name: update fpm conf group
+  lineinfile:
+    path: /etc/php/8.0/fpm/pool.d/www.conf
+    regexp: "(group = ).+"
+    line: '\1{{ user_name }}'
+    backrefs: yes
+
+- name: update fpm conf listen owner
+  lineinfile:
+    path: /etc/php/8.0/fpm/pool.d/www.conf
+    regexp: "(listen.owner = ).+"
+    line: '\1{{ user_name }}'
+    backrefs: yes
+
+- name: update fpm conf group owner
+  lineinfile:
+    path: /etc/php/8.0/fpm/pool.d/www.conf
+    regexp: "(group.owner = ).+"
+    line: '\1{{ user_name }}'
+    backrefs: yes
+
+- name: update fpm ini upload max filesize
+  lineinfile:
+    path: /etc/php/8.0/fpm/php.ini
+    regexp: "upload_max_filesize"
+    line: "upload_max_filesize = 64M"
+
+- name: update fpm ini upload max post max size
+  lineinfile:
+    path: /etc/php/8.0/fpm/php.ini
+    regexp: "post_max_size"
+    line: "post_max_size = 64M"
+  notify:
+    - Test php configuration
+    - Restart php service
+# - name: Update config to test nginx and php
+#   replace:
+#     backup: yes
+#     path: /etc/nginx/sites-available/default
+#     regexp: '#location ~ \\.php\$ \{\s.+\s.+\s.+\s.+\s.+\s.+#.+\n.+\}'
+#     replace: |
+#       location ~ \.php$ {
+#                     include snippets/fastcgi-php.conf;
+
+#                     # With php-fpm (or other unix sockets):
+#                     fastcgi_pass unix:/run/php/php8.0-fpm.sock;
+#               }
+
+# - name: Restart nginx
+#   service:
+#     name: nginx
+#     state: restarted
+# - name: Create info.php
+#   copy:
+#     content: |
+#       <?php
+#       phpinfo();
+#       ?>
+#     dest: /var/www/html/info.php
+# - name: Set permissions and ownership for the file
+#   file:
+#     path: /var/www/html/info.php
+#     mode: "0644"
+#     owner: "{{ user_name }}"
+#     group: "{{ user_name }}"

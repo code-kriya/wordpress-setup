@@ -1,0 +1,55 @@
+---
+- name: Add nginx repository
+  apt_repository:
+    repo: "ppa:ondrej/nginx"
+    state: present
+
+- name: Import GPG key for nginx repository
+  apt_key:
+    url: https://nginx.org/keys/nginx_signing.key
+    state: present
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Remove the sites available
+  file:
+    path: /etc/nginx/sites-available/default
+    state: absent
+
+- name: Remove the sites enabled
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Copy nginx configuration for wordpress
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+
+- name: update worker processes
+  lineinfile:
+    regexp: "worker_processes"
+    line: "worker_processes {{ ansible_processor_count }};"
+    path: /etc/nginx/nginx.conf
+
+- name: Retrieve open file limit
+  shell: ulimit -n
+  register: open_file_limit
+
+- name: Update worker connections
+  lineinfile:
+    regexp: "worker_connections"
+    line: "    worker_connections {{ open_file_limit.stdout }};"
+    path: /etc/nginx/nginx.conf
+
+- name: Update fastcgi_param
+  lineinfile:
+    regexp: '^fastcgi_param\s+SCRIPT_NAME\s+\$fastcgi_script_name;'
+    line: "fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;"
+    path: /etc/nginx/fastcgi_params
+  notify:
+    - restart nginx
+    - test nginx configuration

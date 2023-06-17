@@ -1,0 +1,10 @@
+---
+- name: Install nginx, php-fpm, MySQL and Wordpress
+  hosts: "{{passed_in_hosts}}"
+  become: yes
+  # remote_user: root
+  roles:
+    - nginx
+    - php-fpm
+    - wordpress-cli
+    - mysql
