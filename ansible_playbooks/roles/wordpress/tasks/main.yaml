@@ -47,6 +47,10 @@
   command: "wp core config --dbname={{ wp_db_name }} --dbuser={{ wp_db_user }} --dbpass={{ wp_db_password }} --path=/home/ubuntu/server/public"
   ignore_errors: true
 
+- name:
+  become_user: ubuntu
+  command: "wp core install --url=http://{{ passed_in_hosts }} --title='Demo Webonise' --admin_user=amit --admin_email=amit@daivimtech.com --admin_password=password --path=/home/ubuntu/server/public"
+
 # - name: Copy WordPress config file
 #   template: src=wp-config.php dest=/srv/wordpress/
 
