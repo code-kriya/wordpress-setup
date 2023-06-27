@@ -34,3 +34,19 @@ variable "mysql_password" {
   default = "password"
   # sensitive = true
 }
+
+variable "wp_db_name" {
+  type = string
+  default = "wp_db"
+}
+
+variable "wp_db_user" {
+  type = string
+  default = "wp_user"
+}
+
+variable "wp_db_password" {
+  type = string
+  default = "mypass"
+  # sensitive = true
+}

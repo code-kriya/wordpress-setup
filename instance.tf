@@ -9,7 +9,7 @@ resource "aws_instance" "wordpress-server" {
   provisioner "local-exec" {
     command = <<EOF
 aws --profile ${var.profile} ec2 wait instance-status-ok --region ${var.region-master} --instance-ids ${self.id} \
-&& ansible-playbook --extra-vars 'passed_in_hosts=${self.public_ip} user_name=ubuntu mysql_password=${var.mysql_password}' ansible_playbooks/site.yaml
+&& ansible-playbook --extra-vars 'passed_in_hosts=${self.public_ip} user_name=ubuntu mysql_password=${var.mysql_password} wp_db_name=${var.wp_db_name} wp_db_user=${var.wp_db_user} wp_db_password=${var.wp_db_password}' ansible_playbooks/site.yaml
 EOF
   }
 

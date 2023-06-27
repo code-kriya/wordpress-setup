@@ -26,20 +26,6 @@
       - php8.0-soap
       - php8.0-zip
 
-- name: update fpm conf user
-  lineinfile:
-    path: /etc/php/8.0/fpm/pool.d/www.conf
-    regexp: "(user = ).+"
-    line: '\1{{ user_name }}'
-    backrefs: yes
-
-- name: update fpm conf group
-  lineinfile:
-    path: /etc/php/8.0/fpm/pool.d/www.conf
-    regexp: "(group = ).+"
-    line: '\1{{ user_name }}'
-    backrefs: yes
-
 - name: update fpm conf listen owner
   lineinfile:
     path: /etc/php/8.0/fpm/pool.d/www.conf
@@ -51,6 +37,20 @@
   lineinfile:
     path: /etc/php/8.0/fpm/pool.d/www.conf
     regexp: "(group.owner = ).+"
+    line: '\1{{ user_name }}'
+    backrefs: yes
+
+- name: update fpm conf user
+  lineinfile:
+    path: /etc/php/8.0/fpm/pool.d/www.conf
+    regexp: "(user = )www-data"
+    line: '\1{{ user_name }}'
+    backrefs: yes
+
+- name: update fpm conf group
+  lineinfile:
+    path: /etc/php/8.0/fpm/pool.d/www.conf
+    regexp: "(group = )www-data"
     line: '\1{{ user_name }}'
     backrefs: yes
 

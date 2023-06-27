@@ -4,7 +4,7 @@ apt update
 
 apt install python3-pip -y
 
-pip3 install awscli==1.27.155 ansible==8.0.0
+pip3 install awscli==1.27.155 ansible==8.0.0 boto3==1.26.155
 
 apt-get update &&  apt-get install -y gnupg wget software-properties-common
 

@@ -13,7 +13,6 @@
   apt:
     name: nginx
     state: present
-
 - name: Remove the sites available
   file:
     path: /etc/nginx/sites-available/default
@@ -24,16 +23,17 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: Copy nginx configuration for wordpress
+- name: Copy nginx configuration
   template:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
-
+  # register: conf_updated
 - name: update worker processes
   lineinfile:
     regexp: "worker_processes"
     line: "worker_processes {{ ansible_processor_count }};"
     path: /etc/nginx/nginx.conf
+  # when: conf_updated is succeeded
 
 - name: Retrieve open file limit
   shell: ulimit -n
@@ -44,12 +44,14 @@
     regexp: "worker_connections"
     line: "    worker_connections {{ open_file_limit.stdout }};"
     path: /etc/nginx/nginx.conf
+  # when: conf_updated is succeeded
 
 - name: Update fastcgi_param
   lineinfile:
     regexp: '^fastcgi_param\s+SCRIPT_NAME\s+\$fastcgi_script_name;'
     line: "fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;"
     path: /etc/nginx/fastcgi_params
+  # when: conf_updated is succeeded
   notify:
     - restart nginx
     - test nginx configuration

@@ -1,0 +1,76 @@
+---
+- name: Download WordPress cli
+  get_url:
+    url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    dest: /usr/local/bin/wp
+- name: Change file permissions
+  file:
+    path: /usr/local/bin/wp
+    mode: "777"
+
+- name: server
+  become_user: ubuntu
+  file:
+    path: /home/ubuntu/server/public
+    state: directory
+
+- name: server
+  become_user: ubuntu
+  file:
+    path: /home/ubuntu/server/logs
+    state: directory
+
+- name: download wordpress
+  become_user: ubuntu
+  command: wp core download --path=/home/ubuntu/server/public
+  ignore_errors: true
+
+- name: Create WordPress database
+  mysql_db:
+    name: "{{ wp_db_name }}"
+    state: present
+    login_user: "root"
+    login_password: "{{ mysql_password }}"
+
+- name: Create WordPress database user
+  mysql_user:
+    name: "{{ wp_db_user }}"
+    password: "{{ wp_db_password }}"
+    priv: "{{ wp_db_name }}.*:ALL"
+    host: "localhost"
+    state: present
+    login_user: "root"
+    login_password: "{{ mysql_password }}"
+
+- name: Create wp-config.php
+  become_user: ubuntu
+  command: "wp core config --dbname={{ wp_db_name }} --dbuser={{ wp_db_user }} --dbpass={{ wp_db_password }} --path=/home/ubuntu/server/public"
+  ignore_errors: true
+
+# - name: Copy WordPress config file
+#   template: src=wp-config.php dest=/srv/wordpress/
+
+# - name: update fpm conf group
+#   lineinfile:
+#     path: /etc/php/8.0/fpm/pool.d/www.conf
+#     regexp: ";chdir = "
+#     line: "chidr = /home/ubuntu/server/public"
+#     backrefs: yes
+
+- name: Copy nginx configuration
+  template:
+    src: default
+    # dest: /etc/nginx/sites-enabled/server
+    dest: /etc/nginx/sites-available/default
+
+# # - name: Change ownership of WordPress installation
+# #   file: path=/srv/wordpress/ owner=wordpress group=wordpress state=directory recurse=yes setype=httpd_sys_content_t
+
+- name: Restart php service
+  command: service php8.0-fpm restart
+
+- name: test nginx service
+  command: nginx -t
+
+- name: Restart nginx service
+  command: service nginx restart
